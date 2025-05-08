@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tap Millonario Online</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #111;
+      color: white;
+      text-align: center;
+      user-select: none;
+    }
+    .contenedor {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 1rem;
+      margin: 5px;
+    }
+    #juego {
+      display: none;
+    }
+    #puntos {
+      font-size: 2.5rem;
+      color: #00ff88;
+      margin: 20px;
+    }
+    .pantalla {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="contenedor">
+    <div id="inicio">
+      <h1>Escribe tu nombre para empezar</h1>
+      <input type="text" id="nombre" placeholder="Tu nombre" />
+      <button onclick="empezarJuego()">Jugar</button>
+    </div>
+
+    <div id="juego">
+      <h2 id="bienvenida"></h2>
+      <div id="puntos">0</div>
+      <div class="pantalla" onclick="sumarPunto()"></div>
+      <div id="ganador"></div>
+    </div>
+  </div>
+
+  <script>
+    let puntos = 0;
+    const objetivo = 1000000000;
+    let nombre = "";
+    const puntosTexto = document.getElementById("puntos");
+
+    async function obtenerGanador() {
+      const res = await fetch("https://tu-servidor.com/ganador");
+      const data = await res.json();
+      if (data.ganador) {
+        document.getElementById("ganador").innerHTML = `<h3>Primer ganador: ${data.ganador}</h3>`;
+      }
+    }
+
+    async function registrarGanador() {
+      try {
+        const res = await fetch("https://tu-servidor.com/ganador", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nombre })
+        });
+
+        if (res.ok) {
+          document.getElementById("ganador").innerHTML = `<h3>Primer ganador: ${nombre}</h3>`;
+          alert("¡Felicidades! Llegaste a un billón de puntos y eres el primer ganador.");
+        }
+      } catch (e) {
+        console.error("Error al registrar ganador", e);
+      }
+    }
+
+    function empezarJuego() {
+      nombre = document.getElementById("nombre").value.trim();
+      if (!nombre) {
+        alert("Por favor, escribe tu nombre.");
+        return;
+      }
+
+      document.getElementById("inicio").style.display = "none";
+      document.getElementById("juego").style.display = "block";
+      document.getElementById("bienvenida").textContent = `¡Hola, ${nombre}! Empieza a tocar.`;
+
+      obtenerGanador();
+    }
+
+    function sumarPunto() {
+      puntos++;
+      puntosTexto.textContent = puntos.toLocaleString("es-ES");
+      if (puntos === objetivo) registrarGanador();
+    }
+  </script>
+</body>
+</html>
